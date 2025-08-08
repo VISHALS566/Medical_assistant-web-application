@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Model Prediction</title>
+
+    <!-- Link existing CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f9fafb;
+            margin: 0;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background: #ffffff;
+            max-width: 400px;
+            width: 100%;
+            border-radius: 12px;
+            padding: 2rem 2.5rem;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        label {
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 0.3rem;
+            display: block;
+            font-size: 1rem;
+        }
+        input[type="number"],
+        input[type="text"] {
+            padding: 0.65rem 0.85rem;
+            font-size: 1rem;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            transition: border-color 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            border-color: #2980b9;
+            outline: none;
+            box-shadow: 0 0 4px #2980b9aa;
+        }
+        button[type="submit"] {
+            background-color: #2980b9;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+        button[type="submit"]:hover,
+        button[type="submit"]:focus {
+            background-color: #1c5980;
+            outline: none;
+        }
+        .prediction {
+            margin-top: 2rem;
+            background-color: #dff0d8;
+            border-left: 6px solid #3c763d;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            color: #3c763d;
+            font-weight: 600;
+            font-size: 1.15rem;
+            text-align: center;
+        }
+        /* Responsive */
+        @media(max-width: 480px) {
+            .container {
+                padding: 1.5rem 1.8rem;
+                margin: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Enter Your Details for Prediction</h1>
+
+        <form action="/predict" method="post" aria-label="Disease prediction form">
+            <label for="age">Age <span aria-hidden="true">*</span></label>
+            <input 
+                type="number" 
+                id="age" 
+                name="age" 
+                min="0" max="120" 
+                placeholder="Enter your age" 
+                required 
+                aria-required="true"
+            >
+
+            <label for="symptoms">Symptoms <span aria-hidden="true">*</span></label>
+            <input 
+                type="text" 
+                id="symptoms" 
+                name="symptoms" 
+                placeholder="e.g., cough, fever, fatigue" 
+                required 
+                aria-required="true"
+                aria-describedby="symptomsHelp"
+            >
+            <small id="symptomsHelp" style="color: #777; font-size: 0.875rem; margin-top:-1rem; margin-bottom:1rem; display:block;">
+                Please list your symptoms separated by commas.
+            </small>
+
+            <button type="submit">Predict</button>
+        </form>
+
+        
+            <div class="prediction" role="alert" aria-live="assertive">
+                Prediction: <strong>{ prediction }</strong>
+            </div>
+    
+    </div>
+
+</body>
+</html>

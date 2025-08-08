@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LMK Hospital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">  <!-- Linked style.css here -->
+
+</head>
+<body>
+  <header>
+    <div class="logo">
+    <img src="medat_logo.png" alt="Medat Assistant Logo" style="width:100px; height:auto;">
+    </div>
+<div class="nav">
+        <div style="display: inline-flex; gap: 80px; font-size: 2.0rem; font-weight: bold;">
+  <a href="templates/index.html">Patients Helping Portal</a>
+  <a href="translate.html">Translate</a>
+</div>
+
+
+
+
+
+
+  <script>
+    document.getElementById('signLanguageBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      window.location.href = 'backend/Text-to-Speech/index.html';
+    });
+  </script>
+
+</div>
+    <div class="top-buttons">
+  <button class="emergency">Emergency</button>
+  <button onclick="window.location.href='contantus.html'">Contact Us</button>
+</div>
+
+
+  </header>
+  <section class="hero">
+    <img class="hero-logo" src="medat_logo.png" alt="Medat Assistant Logo" style="width:240px; height:auto;">
+    <h1>When Words Fail, Our Assistant Speaks</h1>
+    <h2>Bridging Generations with Every Word</h2>
+    
+    <div class="hero-buttons">
+      <a href="appoinment.html" class="request">Request an Appointment</a>
+      <a href="find.html" class="find">Find a Doctor</a>
+
+
+    </div>
+
+<style>
+  /* Container styles */
+  #tile-container {
+    display: flex;
+    overflow-x: hidden; /* Hide native scrollbar */
+    gap: 1rem;
+    scroll-behavior: smooth; /* smooth scrolling on JS scrollBy */
+    padding: 1rem 2rem; /* padding left/right to avoid arrow overlap */
+    position: relative;
+  }
+
+  /* Tiles styles (same as yours) */
+  .tile {
+    flex: 0 0 290px;
+    background: #f2f8fc;
+    border-radius: 12px;
+    border: 1px solid #c4dbe2;
+    box-shadow: 0 2px 8px #0001;
+    padding: 1.4rem;
+  }
+
+  /* Left and right arrow buttons */
+  .scroll-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(25, 118, 210, 0.8);
+    border: none;
+    color: white;
+    font-size: 2rem;
+    width: 3rem;
+    height: 3rem;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    user-select: none;
+    z-index: 10;
+  }
+
+  #scroll-left {
+    left: 0.5rem;
+  }
+
+  #scroll-right {
+    right: 0.5rem;
+  }
+</style>
+
+<section style="position: relative; max-width: 100%; margin-top: 2rem;">
+  <!-- Left scroll button -->
+  <button id="scroll-left" class="scroll-arrow" aria-label="Scroll left">&#8249;</button>
+
+  <!-- Right scroll button -->
+  <button id="scroll-right" class="scroll-arrow" aria-label="Scroll right">&#8250;</button>
+
+  <!-- Scrollable tiles container -->
+  <div id="tile-container">
+    <div class="tile">
+      <h3 style="color:#1976d2;">Maintain Healthy Blood Pressure</h3>
+      <p>High blood pressure increases risk for heart and organ disease. Regular check-ups and stress management help keep it in control.</p>
+    </div>
+
+    <div class="tile" style="background:#f8f2fc; border:1px solid #dbc4e2;">
+      <h3 style="color:#c2185b;">Exercise Regularly</h3>
+      <p>Aim for at least 150 minutes of moderate aerobic activity weekly. Physical activity strengthens the heart, lungs, and organs.</p>
+    </div>
+
+    <div class="tile" style="background:#fcf8f2; border:1px solid #e2dbc4;">
+      <h3 style="color:#ff9800;">Eat a Balanced Diet</h3>
+      <p>Include fruits, vegetables, whole grains, and healthy fats. Plant-based foods support heart, kidneys, and liver health.</p>
+    </div>
+
+    <div class="tile" style="background:#f2fcf8; border:1px solid #c4e2db;">
+      <h3 style="color:#388e3c;">Stay Hydrated</h3>
+      <p>Adequate water intake supports kidneys, liver detoxification, and healthy circulation.</p>
+    </div>
+
+    <div class="tile" style="background:#fcf2f8; border:1px solid #e2c4db;">
+      <h3 style="color:#ad1457;">Avoid Smoking</h3>
+      <p>Smoking damages blood vessels, lungs, kidneys, and heart. Quitting reduces risks significantly.</p>
+    </div>
+
+    <div class="tile" style="background:#f8fcf2; border:1px solid #dbdbc4;">
+      <h3 style="color:#287c5c;">Get Quality Sleep</h3>
+      <p>Restful sleep improves heart, brain, and organ function. Aim for 7+ hours every night.</p>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+    
+  </section>
+  <script src="script.js"></script>
+  
+  <script>
+  // Emergency button click handler
+  document.querySelector('.emergency').addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    // Get user location
+    navigator.geolocation.getCurrentPosition(position => {
+      const userLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+
+      // Create a PlacesService instance (dummy map element needed)
+      const map = new google.maps.Map(document.createElement('div'));
+      const service = new google.maps.places.PlacesService(map);
+
+      // Define request for nearby hospitals within 3km radius
+      const request = {
+        location: userLocation,
+        radius: 3000, // 3 km
+        type: ['hospital']
+      };
+
+      // Show loading message
+      showStatusMessage('Locating nearby hospitals...');
+
+      // Search nearby hospitals
+      service.nearbySearch(request, (results, status) => {
+        removeStatusMessage();
+
+        if (status !== google.maps.places.PlacesServiceStatus.OK || !results || results.length === 0) {
+          alert('No nearby hospitals found.');
+          return;
+        }
+
+        // Build hospital list HTML
+        let hospitalListHTML = '<h3>Nearby Hospitals (within 3 km):</h3><ul style="list-style:none; padding-left:0;">';
+
+        // We will get additional details (phone, address) for each place, so prepare promises to call getDetails()
+        const detailsPromises = results.slice(0,10).map(place => {
+          return new Promise((resolve) => {
+            service.getDetails({ placeId: place.place_id, fields: ['name', 'formatted_address', 'formatted_phone_number'] }, (placeDetails, statusDetails) => {
+              if (statusDetails === google.maps.places.PlacesServiceStatus.OK && placeDetails) {
+                resolve(placeDetails);
+              } else {
+                // fallback minimal info
+                resolve(place);
+              }
+            });
+          });
+        });
+
+        // When all details fetched, create list and display modal
+        Promise.all(detailsPromises).then(detailsList => {
+          detailsList.forEach(place => {
+            const name = place.name || 'Unnamed Hospital';
+            const address = place.formatted_address || 'Address not available';
+            const phone = place.formatted_phone_number || 'Phone not available';
+
+            hospitalListHTML += `<li><strong>${name}</strong><br>${address}<br>Phone: ${phone}</li><br>`;
+          });
+
+          hospitalListHTML += '</ul>';
+
+          showModal(hospitalListHTML);
+        });
+      });
+    }, error => {
+      alert('Error obtaining location: ' + error.message);
+    });
+
+  });
+
+  function showStatusMessage(msg) {
+    const statusDiv = document.createElement('div');
+    statusDiv.id = 'statusMessageBox';
+    statusDiv.style.position = 'fixed';
+    statusDiv.style.top = '20px';
+    statusDiv.style.right = '20px';
+    statusDiv.style.padding = '1rem';
+    statusDiv.style.backgroundColor = '#1769aa';
+    statusDiv.style.color = 'white';
+    statusDiv.style.borderRadius = '8px';
+    statusDiv.style.zIndex = 9999;
+    statusDiv.textContent = msg;
+    document.body.appendChild(statusDiv);
+  }
+
+  function removeStatusMessage() {
+    const elem = document.getElementById('statusMessageBox');
+    if(elem) elem.remove();
+  }
+
+  function showModal(contentHTML) {
+    // Remove existing modal if any
+    const existingModal = document.getElementById('hospitalModal');
+    if(existingModal) existingModal.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'hospitalModal';
+    modal.style.position = 'fixed';
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    modal.style.backgroundColor = 'white';
+    modal.style.padding = '1.5rem 2rem';
+    modal.style.maxHeight = '70vh';
+    modal.style.overflowY = 'auto';
+    modal.style.border = '2px solid #1769aa';
+    modal.style.borderRadius = '10px';
+    modal.style.zIndex = 10000;
+    modal.style.boxShadow = '0 0 15px rgba(0,0,0,0.3)';
+    modal.innerHTML = contentHTML;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close';
+    closeBtn.style.marginTop = '1rem';
+    closeBtn.style.padding = '0.5rem 1rem';
+    closeBtn.style.border = 'none';
+    closeBtn.style.backgroundColor = '#1769aa';
+    closeBtn.style.color = 'white';
+    closeBtn.style.borderRadius = '5px';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.addEventListener('click', () => {
+      modal.remove();
+      document.body.style.overflow = 'auto'; // Restore scroll
+    });
+
+    modal.appendChild(closeBtn);
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling while modal open
+  }
+  const container = document.getElementById('tile-container');
+  const btnLeft = document.getElementById('scroll-left');
+  const btnRight = document.getElementById('scroll-right');
+
+  const scrollAmount = 300; // pixels to scroll per click (adjust based on tile width + gap)
+
+  btnLeft.addEventListener('click', () => {
+    container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+  });
+
+  btnRight.addEventListener('click', () => {
+    container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  });
+
+
+</script>
+
+</body>
+
+</html>

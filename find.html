@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Find Nearest Clinics</title>
+<style>
+  :root {
+    --primary-blue: #7d154c;
+    --primary-blue-dark: #7d154c;
+    --primary-blue-light: #7d154c;
+    --bg-light: #fcebd4;
+    --text-dark: #7d154c;
+    --text-light: #fcebd4;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 1.5rem auto;
+    max-width: 480px;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    padding: 1rem 1rem 3rem 1rem;
+  }
+  h1 {
+    color: var(--primary-blue);
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    font-size: 1.9rem;
+  }
+  button {
+    display: block;
+    width: 100%;
+    background-color: var(--primary-blue);
+    border: none;
+    color: var(--text-light);
+    padding: 1rem 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(23, 105, 170, 0.4);
+    transition: background-color 0.3s ease;
+    margin-bottom: 1.25rem;
+  }
+  button:hover, button:focus {
+    background-color: var(--primary-blue-dark);
+    outline: none;
+  }
+  #status {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    min-height: 1.3rem;
+  }
+  #clinic-list {
+    list-style: none;
+    padding: 0;
+  }
+  .clinic-item {
+    background-color: rgb(112, 133, 43);
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(23, 105, 170, 0.15);
+    margin-bottom: 1rem;
+    transition: box-shadow 0.25s ease;
+  }
+  .clinic-item:hover {
+    box-shadow: 0 4px 20px rgba(23, 105, 170, 0.3);
+  }
+  .clinic-name {
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: var(--primary-blue-dark);
+    margin-bottom: 0.35rem;
+  }
+  .clinic-details {
+    font-size: 0.95rem;
+    color: #fcebd4;
+  }
+  @media (max-width: 520px) {
+    body {
+      margin: 1rem 0.8rem 2rem 0.8rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Find Nearest Clinics</h1>
+
+<button id="findClinicsBtn" aria-label="Find clinics near me">Find Clinics Near Me</button>
+
+<div id="status" role="status" aria-live="polite"></div>
+
+<ul id="clinic-list" aria-label="List of nearby clinics"></ul>
+
+<script>
+  const statusDiv = document.getElementById('status');
+  const clinicListDiv = document.getElementById('clinic-list');
+  const findClinicsBtn = document.getElementById('findClinicsBtn');
+
+  // Compute distance (Haversine formula) in meters
+  function computeDistance(lat1, lon1, lat2, lon2) {
+    function toRad(x) { return x * Math.PI / 180; }
+    const R = 6371000; // meters
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2) ** 2 +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  function buildOverpassQuery(lat, lon, radius) {
+    return `
+      [out:json][timeout:25];
+      (
+        node["amenity"="clinic"](around:${radius},${lat},${lon});
+        way["amenity"="clinic"](around:${radius},${lat},${lon});
+        node["healthcare"="clinic"](around:${radius},${lat},${lon});
+        way["healthcare"="clinic"](around:${radius},${lat},${lon});
+        node["amenity"="hospital"](around:${radius},${lat},${lon});
+        way["amenity"="hospital"](around:${radius},${lat},${lon});
+      );
+      out center;
+    `;
+  }
+
+  function parseClinics(elements) {
+    return elements.map(el => {
+      let lat, lon;
+      if (el.type === "node") {
+        lat = el.lat;
+        lon = el.lon;
+      } else if (el.type === "way" && el.center) {
+        lat = el.center.lat;
+        lon = el.center.lon;
+      }
+      let name = (el.tags && el.tags.name) ? el.tags.name : "Unnamed Clinic or Hospital";
+      return { name, lat, lon };
+    });
+  }
+
+  async function fetchClinics(lat, lon, radius=3000) {
+    const query = buildOverpassQuery(lat, lon, radius);
+    const url = "https://overpass-api.de/api/interpreter";
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        body: query,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch clinics: ${response.statusText}`);
+
+      }
+
+      const data = await response.json();
+      return parseClinics(data.elements);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  function displayClinics(clinics, userLat, userLon) {
+    clinicListDiv.innerHTML = "";
+    if (clinics.length === 0) {
+      clinicListDiv.innerHTML = '<li>No clinics or hospitals found nearby.</li>';
+      return;
+    }
+
+    clinics.forEach(c => {
+      c.distance = computeDistance(userLat, userLon, c.lat, c.lon);
+    });
+
+    clinics.sort((a, b) => a.distance - b.distance);
+
+    clinics.slice(0, 10).forEach(clinic => {
+      const li = document.createElement("li");
+      li.className = "clinic-item";
+      li.innerHTML = `
+        <div class="clinic-name">${clinic.name}</div>
+        <div class="clinic-details">
+          Distance: ${(clinic.distance/1000).toFixed(2)} km<br />
+          Latitude: ${clinic.lat.toFixed(5)} | Longitude: ${clinic.lon.toFixed(5)}
+        </div>`;
+      clinicListDiv.appendChild(li);
+    });
+  }
+
+  findClinicsBtn.addEventListener("click", () => {
+    clinicListDiv.innerHTML = "";
+
+    statusDiv.textContent = "Locating your position...";
+
+    if (!navigator.geolocation) {
+      statusDiv.textContent = "Sorry, your browser does not support location access.";
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      statusDiv.textContent = `Found your location: (${lat.toFixed(5)}, ${lon.toFixed(5)}). Searching nearby clinics...`;
+
+
+      try {
+        const clinics = await fetchClinics(lat, lon);
+        statusDiv.textContent = `Found your location: (${lat.toFixed(5)}, ${lon.toFixed(5)}). Searching nearby clinics...`;
+
+        displayClinics(clinics, lat, lon);
+      } catch (err) {
+        statusDiv.textContent = "Error retrieving clinics: " + err.message;
+      }
+    }, (error) => {
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          statusDiv.textContent = "Location permission denied. Please enable location.";
+          break;
+        case error.POSITION_UNAVAILABLE:
+          statusDiv.textContent = "Location unavailable.";
+          break;
+        case error.TIMEOUT:
+          statusDiv.textContent = "Location request timed out. Please try again.";
+          break;
+        default:
+          statusDiv.textContent = "Unknown error occurred obtaining location.";
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

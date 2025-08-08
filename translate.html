@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Medical Translator with Accuracy Comparison</title>
+  <style>
+    :root {
+      --primary: #990066;
+      --secondary: #990066;
+      --success: #10b981;
+      --danger: #ef4444;
+      --info: #3b82f6;
+      --light: #f8fafc;
+      --dark: #1e293b;
+      --bar-bg: #e2e8f0;
+      --bar-fill: #2563eb;
+      --bar-lingva: #2563eb;
+      --bar-google: #34a853;
+      --bar-deepl: #ff9900;
+      --bar-microsoft: #0078d4;
+      --bar-amazon: #ff9900;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #fcebd4,#fcebd4);
+      margin: 0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 750px;
+      margin: 2.5rem auto;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 4px 40px #c6d4ee33;
+      padding: 2rem 2.2rem 3rem 2.2rem;
+    }
+    h1 {
+      text-align: center;
+      font-weight: 900;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+      font-size: 2rem;
+      letter-spacing: -1px;
+    }
+    label {
+      font-weight: 600;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      resize: vertical;
+      padding: 1.05rem;
+      border-radius: 10px;
+      border: 2px solid #e2e8f0;
+      font-size: 1rem;
+      transition: border 0.2s;
+      box-sizing: border-box;
+    }
+    textarea:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+    .language-controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.3rem;
+      align-items: flex-end;
+    }
+    .language-selector {
+      flex: 1;
+    }
+    select {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border-radius: 7px;
+      font-size: 1rem;
+      border: 2px solid #fcebd4;
+      background: #fcebd4;
+    }
+    .swap-btn {
+      width: 44px;
+      height: 44px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .swap-btn:hover {
+      background: var(--success);
+      transform: rotate(180deg) scale(1.07);
+    }
+    button {
+      width: 100%;
+      margin-top: 0.4rem;
+      padding: 0.85rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1.08rem;
+      background: linear-gradient(85deg, var(--primary), var(--secondary));
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.14s;
+    }
+    button:disabled {
+      background: #cbd5e1;
+      color: #64748b;
+      cursor: not-allowed;
+    }
+    #output {
+      display: none;
+      background: var(--light);
+      margin-top: 1.7rem;
+      border-left: 6px solid var(--primary);
+      border-radius: 10px;
+      padding: 1.2rem 1.3rem;
+      font-size: 1.13rem;
+    }
+    #output.error {
+      background: #fff1f2;
+      border-left: 6px solid var(--danger);
+    }
+    #output.info {
+      background: #eff6ff;
+      border-left: 6px solid var(--info);
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #e2e8f0;
+      border-radius: 50%;
+      border-top: 3px solid var(--primary);
+      margin-right: 10px;
+      animation: spin 1s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    .output-action-btn {
+      border: none;
+      background: none;
+      color: var(--info);
+      margin-left: 11px;
+      font-size: 1.16em;
+      cursor: pointer;
+      vertical-align: middle;
+      transition: color 0.19s;
+    }
+    .output-action-btn:hover {
+      color: var(--primary);
+    }
+    .accuracy-bar-container {
+      margin-top: 2.4rem;
+    }
+    .accuracy-bar-title {
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      font-size: 1.05rem;
+      color: var(--dark);
+    }
+    .accuracy-bar {
+      background: var(--bar-bg);
+      border-radius: 10px;
+      overflow: hidden;
+      height: 28px;
+      margin-bottom: 0.9rem;
+      display: flex;
+      align-items: center;
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.1);
+    }
+    .accuracy-fill {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding-left: 10px;
+      color: white;
+      font-weight: 600;
+      border-radius: 10px 0 0 10px;
+      white-space: nowrap;
+      user-select: none;
+      font-size: 0.9rem;
+    }
+    .accuracy-lingva { background-color: var(--bar-lingva); }
+    .accuracy-google { background-color: var(--bar-google); }
+    .accuracy-deepl { background-color: var(--bar-deepl); }
+    .accuracy-microsoft { background-color: var(--bar-microsoft); }
+    .accuracy-amazon { background-color: var(--bar-amazon); }
+    @media (max-width: 680px) {
+      .container {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <h1>Medical Translator</h1>
+    <div style="text-align:center;color:#64748b;margin-bottom:1.1rem;">
+      Instant medical text translation in English, Indian, Asian, European, and global languages.<br/>
+      <span style="color:#2563eb;">Powered by Lingva Translate</span>
+    </div>
+    <div class="form-group">
+      <label for="sourceText">Enter medical text</label>
+      <textarea id="sourceText" placeholder="Describe symptoms, conditions, or medications..." aria-label="Enter medical text"></textarea>
+    </div>
+    <div class="language-controls">
+      <div class="language-selector">
+        <label for="sourceLang">From</label>
+        <select id="sourceLang" aria-label="Select source language"></select>
+      </div>
+      <button class="swap-btn" onclick="swapLanguages()" title="Swap languages" aria-label="Swap source and target languages">&#8646;</button>
+      <div class="language-selector">
+        <label for="targetLang">To</label>
+        <select id="targetLang" aria-label="Select target language"></select>
+      </div>
+    </div>
+    <button id="translateBtn" onclick="translateText()" aria-label="Translate text">Translate</button>
+    <div id="output" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Accuracy comparison bars -->
+    <div class="accuracy-bar-container" id="accuracyContainer" aria-label="Translation Accuracy Comparison" role="region" hidden>
+      <div class="accuracy-bar-title">Translation Accuracy Comparison for Medical Text (Approximate)</div>
+
+      <div class="accuracy-bar" title="Lingva Translate (Google proxy): ~84%">
+        <div class="accuracy-fill accuracy-lingva" style="width: 84%;">Lingva Translate: 84%</div>
+      </div>
+
+      <div class="accuracy-bar" title="Google Translate API: ~83%">
+        <div class="accuracy-fill accuracy-google" style="width: 83%;">Google Translate API: 83%</div>
+      </div>
+
+      <div class="accuracy-bar" title="DeepL API (European languages): ~93%">
+        <div class="accuracy-fill accuracy-deepl" style="width: 93%;">DeepL API: 93%</div>
+      </div>
+
+      <div class="accuracy-bar" title="Microsoft Translator API: ~82%">
+        <div class="accuracy-fill accuracy-microsoft" style="width: 82%;">Microsoft Translator API: 82%</div>
+      </div>
+
+      <div class="accuracy-bar" title="Amazon Translate: ~77%">
+        <div class="accuracy-fill accuracy-amazon" style="width: 77%;">Amazon Translate: 77%</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'hi', name: 'Hindi' },
+    { code: 'ta', name: 'Tamil' },
+    { code: 'bn', name: 'Bengali' },
+    { code: 'ml', name: 'Malayalam' },
+    { code: 'mr', name: 'Marathi' },
+    { code: 'te', name: 'Telugu' },
+    { code: 'gu', name: 'Gujarati' },
+    { code: 'kn', name: 'Kannada' },
+    { code: 'pa', name: 'Punjabi' },
+    { code: 'or', name: 'Odia' },
+    { code: 'ur', name: 'Urdu' },
+    { code: 'fr', name: 'French' },
+    { code: 'de', name: 'German' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'ru', name: 'Russian' },
+    { code: 'ja', name: 'Japanese' },
+    { code: 'ko', name: 'Korean' },
+    { code: 'zh', name: 'Chinese (Simplified)' },
+    { code: 'zh-TW', name: 'Chinese (Traditional)' },
+    { code: 'ar', name: 'Arabic' },
+    { code: 'fa', name: 'Persian' },
+    { code: 'it', name: 'Italian' },
+    { code: 'pt', name: 'Portuguese' },
+    { code: 'vi', name: 'Vietnamese' },
+    { code: 'tr', name: 'Turkish' },
+    { code: 'th', name: 'Thai' },
+    { code: 'pl', name: 'Polish' },
+    { code: 'nl', name: 'Dutch' },
+    { code: 'el', name: 'Greek' },
+    { code: 'he', name: 'Hebrew' },
+    { code: 'id', name: 'Indonesian' },
+    { code: 'sv', name: 'Swedish' },
+    { code: 'no', name: 'Norwegian' },
+    { code: 'fi', name: 'Finnish' },
+    { code: 'da', name: 'Danish' },
+    { code: 'hu', name: 'Hungarian' },
+    { code: 'cs', name: 'Czech' }
+  ];
+
+  const sourceText = document.getElementById('sourceText');
+  const sourceLang = document.getElementById('sourceLang');
+  const targetLang = document.getElementById('targetLang');
+  const outputDiv = document.getElementById('output');
+  const translateBtn = document.getElementById('translateBtn');
+  const accuracyContainer = document.getElementById('accuracyContainer');
+
+  function populateLanguages(select, defaultCode) {
+    select.innerHTML = '';
+    for (const lang of languages) {
+      const option = document.createElement('option');
+      option.value = lang.code;
+      option.textContent = lang.name;
+      if (lang.code === defaultCode) option.selected = true;
+      select.appendChild(option);
+    }
+  }
+  populateLanguages(sourceLang, 'en');
+  populateLanguages(targetLang, 'ta');
+
+  function correctMedicalPhrases(text) {
+    return text.replace(/\bi have fever\b/gi, "I have a fever");
+  }
+
+  function swapLanguages() {
+    const temp = sourceLang.value;
+    sourceLang.value = targetLang.value;
+    targetLang.value = temp;
+  }
+
+  async function translateText() {
+    let text = sourceText.value.trim();
+    if (!text) {
+      showOutput('Please enter text to translate', 'error');
+      accuracyContainer.hidden = true;
+      return;
+    }
+    text = correctMedicalPhrases(text);
+
+    if (sourceLang.value === targetLang.value) {
+      showOutput('Please select different source and target languages', 'error');
+      accuracyContainer.hidden = true;
+      return;
+    }
+
+    showOutput(`
+      <div style="display: flex; align-items: center;">
+        <span class="spinner"></span>
+        <span>Translating using Lingva Translate...</span>
+      </div>
+    `, 'info');
+    outputDiv.style.display = 'block';
+    translateBtn.disabled = true;
+
+    try {
+      const translation = await lingvaTranslate(sourceLang.value, targetLang.value, text);
+      showSuccessfulTranslation(text, translation);
+      // Show accuracy bar when we have output
+      accuracyContainer.hidden = false;
+    } catch (error) {
+      handleTranslationError(error, text);
+      accuracyContainer.hidden = true;
+    } finally {
+      translateBtn.disabled = false;
+    }
+  }
+
+  async function lingvaTranslate(from, to, text) {
+    const baseUrl = "https://lingva.ml/api/v1";
+    const encodedText = encodeURIComponent(text);
+    const url = `${baseUrl}/${from}/${to}/${encodedText}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Lingva Translate error: ' + response.statusText);
+    }
+    const data = await response.json();
+    if (!data.translation) throw new Error('Translation API returned no result.');
+    return data.translation;
+  }
+
+  function showSuccessfulTranslation(originalText, translatedText) {
+    showOutput(`
+      <div style="margin-bottom: 1rem;">
+        <b style="color: var(--primary)">Original (${getLanguageName(sourceLang.value)}):</b>
+        <p>${escapeHtml(originalText)}</p>
+      </div>
+      <div>
+        <b style="color: var(--success)">Translation (${getLanguageName(targetLang.value)}):</b>
+        <p style="font-size:1.15em;">
+          <span id="translatedText">${escapeHtml(translatedText)}</span>
+          <button class="output-action-btn" title="Copy" aria-label="Copy translation" onclick="copyTranslation()">&#128203;</button>
+          <button class="output-action-btn" title="Speak" aria-label="Speak translation" onclick="speakTranslation()">&#128266;</button>
+        </p>
+      </div>
+      <div style="font-size:0.91em; color:#64748b; margin-top:0.7em;">
+        Powered by Lingva Translate
+      </div>
+    `, '');
+  }
+
+  function handleTranslationError(error) {
+    showOutput(`
+      <div style="color: var(--danger); font-weight: 700; margin-bottom: 0.4rem;">
+        Translation Failed
+      </div>
+      <p>${escapeHtml(error.message)}</p>
+      <button onclick="translateText()" style="margin-top:1em;">Try Again</button>
+    `, 'error');
+  }
+
+  function getLanguageName(code) {
+    return languages.find(l => l.code === code)?.name || code;
+  }
+  function escapeHtml(unsafe) {
+    return String(unsafe)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+  function showOutput(message, type = '') {
+    outputDiv.innerHTML = message;
+    outputDiv.className = '';
+    if (type) outputDiv.classList.add(type);
+    outputDiv.style.display = 'block';
+  }
+
+  function copyTranslation() {
+    const text = document.getElementById('translatedText')?.innerText;
+    if (text && window.navigator.clipboard) {
+      window.navigator.clipboard.writeText(text);
+    }
+  }
+
+  function speakTranslation() {
+    const text = document.getElementById('translatedText')?.innerText;
+    if (!text) {
+      alert('No translated text to speak');
+      return;
+    }
+    if (!window.speechSynthesis) {
+      alert('Sorry, your browser does not support speech synthesis.');
+      return;
+    }
+    const langMap = {
+      en: 'en-US', hi: 'hi-IN', ta: 'ta-IN', bn: 'bn-IN',
+      ml: 'ml-IN', mr: 'mr-IN', te: 'te-IN', gu: 'gu-IN',
+      kn: 'kn-IN', pa: 'pa-IN', or: 'or-IN', ur: 'ur-IN',
+      fr: 'fr-FR', de: 'de-DE', es: 'es-ES', ru: 'ru-RU',
+      ja: 'ja-JP', ko: 'ko-KR', zh: 'zh-CN', 'zh-TW': 'zh-TW',
+      ar: 'ar-SA', fa: 'fa-IR', it: 'it-IT', pt: 'pt-PT',
+      vi: 'vi-VN', tr: 'tr-TR', th: 'th-TH', pl: 'pl-PL',
+      nl: 'nl-NL', el: 'el-GR', he: 'he-IL', id: 'id-ID',
+      sv: 'sv-SE', no: 'no-NO', fi: 'fi-FI', da: 'da-DK',
+      hu: 'hu-HU', cs: 'cs-CZ'
+    };
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = langMap[targetLang.value] || 'en-US';
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+    utter.onerror = (e) => {
+      console.error('Speech synthesis error:', e.error);
+      alert('Audio playback failed. Please try again or check your browser settings.');
+    };
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.speak(utter);
+      };
+    } else {
+      window.speechSynthesis.speak(utter);
+    }
+  }
+
+  sourceText.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      translateText();
+    }
+  });
+</script>
+</body>
+</html>

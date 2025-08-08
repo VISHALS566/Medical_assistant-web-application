@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact Us - Patient Support</title>
+  <style>
+    :root {
+      --primary-blue: #990066;
+      --primary-blue-dark: #990066;
+      --background: #f0f4f8;
+      --text-color: #102a43;
+      --input-bg: #ffffff;
+      --input-border: #cbd5e1;
+      --shadow: rgba(37, 99, 235, 0.2);
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    .container {
+      background-color: white;
+      max-width: 450px;
+      width: 100%;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px var(--shadow);
+      box-sizing: border-box;
+      text-align: center;
+    }
+    h1 {
+      color: var(--primary-blue);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+    }
+    p {
+      font-size: 1.1rem;
+      margin: 0.7rem 0;
+      line-height: 1.4;
+    }
+    a {
+      color: var(--primary-blue);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+    a:hover {
+      color: var(--primary-blue-dark);
+      text-decoration: underline;
+    }
+    .icon {
+      display: inline-block;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+      color: var(--primary-blue);
+      font-size: 1.3rem;
+    }
+    footer {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <main class="container" role="main" aria-labelledby="contact-title">
+    <h1 id="contact-title">Contact Us</h1>
+    <p>We're here to support you. If you have any questions or need assistance, please reach out to us!</p>
+
+    <p>
+      <span class="icon" aria-hidden="true">&#9993;</span>
+      Email: <a href="mailto:vishal.s2024a@vitstudent.ac.in" aria-label="Send email to Us">lmvk.healthcare@gmail.com</a>
+    </p>
+
+    <p>
+      <span class="icon" aria-hidden="true">&#9742;</span>
+      Phone: <a href="tel:+91988xxxxxxx" aria-label="Call Vishal">988xxxxxxx</a>
+    </p>
+
+    <footer>
+      &copy; 2025 Patient Support Team. Your health is our priority.
+    </footer>
+  </main>
+</body>
+</html>
